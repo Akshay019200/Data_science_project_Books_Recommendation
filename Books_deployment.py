@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import streamlit as st
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -69,7 +63,7 @@ def main():
     if st.button('Get Recommendations'):
         similar_books = recommend_similar_books(book_title, author_name, df, cosine_sim)
         if similar_books:
-            st.write("Books similar to", book_title or author_name, ":")
+            st.write(f"Books similar to '{book_title}' or by '{author_name}':")
             for book in similar_books:
                 st.write("-", book)
         else:
@@ -77,10 +71,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-# In[ ]:
-
-
-
-
