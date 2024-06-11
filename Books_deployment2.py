@@ -37,17 +37,26 @@ kmeans = KMeans(n_clusters=num_clusters, random_state=42)
 clusters = kmeans.fit_predict(X)
 
 # Function to recommend books
-def recommend_books(book_title, author_name=None):
-    # Use FuzzyWuzzy to find the closest match for the book title
-    match = process.extractOne(book_title, df['title'])
-    if match:
-        matched_title = match[0]
-        title_vector = vectorizer.transform([matched_title])
-        cluster_id = kmeans.predict(title_vector)[0]
-        cluster_books = df[clusters == cluster_id]
-        if author_name:
-            cluster_books = cluster_books[cluster_books['authors'].str.contains(author_name, case=False)]
-        return cluster_books['title'].head(10).values
+def recommend_books(book_title=None, author_name=None):
+    if book_title:
+        # Use FuzzyWuzzy to find the closest match for the book title
+        match = process.extractOne(book_title, df['title'])
+        if match:
+            matched_title = match[0]
+            title_vector = vectorizer.transform([matched_title])
+            cluster_id = kmeans.predict(title_vector)[0]
+            cluster_books = df[clusters == cluster_id]
+            if author_name:
+                cluster_books = cluster_books[cluster_books['authors'].str.contains(author_name, case=False)]
+            return cluster_books['title'].head(10).values
+        else:
+            return []
+    elif author_name:
+        author_books = df[df['authors'].str.contains(author_name, case=False)]
+        if len(author_books) > 0:
+            return author_books['title'].head(10).values
+        else:
+            return []
     else:
         return []
 
@@ -56,12 +65,12 @@ def main():
     st.title('Book Recommendation System')
 
     # Input fields for book title and author name
-    book_title = st.text_input('Enter Book Title:', '')
+    book_title = st.text_input('Enter Book Title (optional):', '')
     author_name = st.text_input('Enter Author Name (optional):', '')
 
     # Get recommendations if the user clicks the button
     if st.button('Get Recommendations'):
-        if book_title:
+        if book_title or author_name:
             similar_books = recommend_books(book_title, author_name)
             if len(similar_books) > 0:
                 st.write(f"Books similar to '{book_title}' or by '{author_name}':")
@@ -70,7 +79,7 @@ def main():
             else:
                 st.write("No similar books found")
         else:
-            st.write("Please enter a book title")
+            st.write("Please enter a book title or an author name")
 
 if __name__ == '__main__':
     main()
