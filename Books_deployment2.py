@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
-
 import streamlit as st
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
@@ -42,35 +36,24 @@ num_clusters = 27  # You can adjust this value
 kmeans = KMeans(n_clusters=num_clusters, random_state=42)
 clusters = kmeans.fit_predict(X)
 
-# Compute silhouette score (higher is better)
-silhouette_avg = silhouette_score(X, clusters)
-print("Silhouette Score:", silhouette_avg)
-
 # Function to recommend books
 def recommend_books(book_title, author_name=None):
-    # Find the best match for the book title
-    book_titles = df['title'].tolist()
-    match = process.extractOne(book_title, book_titles)
-    
+    # Use FuzzyWuzzy to find the closest match for the book title
+    match = process.extractOne(book_title, df['title'])
     if match:
-        match_title = match[0]
-        title_vector = vectorizer.transform([match_title])
+        matched_title = match[0]
+        title_vector = vectorizer.transform([matched_title])
         cluster_id = kmeans.predict(title_vector)[0]
         cluster_books = df[clusters == cluster_id]
-        
         if author_name:
             cluster_books = cluster_books[cluster_books['authors'].str.contains(author_name, case=False)]
-        
-        return cluster_books['title'].values
+        return cluster_books['title'].head(10).values
     else:
         return []
 
 # Streamlit app
 def main():
     st.title('Book Recommendation System')
-
-    # Display Silhouette Score
-    st.write("Silhouette Score:", silhouette_avg)
 
     # Input fields for book title and author name
     book_title = st.text_input('Enter Book Title:', '')
@@ -81,7 +64,7 @@ def main():
         if book_title:
             similar_books = recommend_books(book_title, author_name)
             if len(similar_books) > 0:
-                st.write(f"Books similar to '{book_title}':")
+                st.write(f"Books similar to '{book_title}' or by '{author_name}':")
                 for book in similar_books:
                     st.write("-", book)
             else:
@@ -91,10 +74,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-# In[ ]:
-
-
-
-
