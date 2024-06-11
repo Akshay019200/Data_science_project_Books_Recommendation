@@ -13,7 +13,7 @@ import numpy as np
 from fuzzywuzzy import process
 
 # Load the dataset
-df = pd.read_csv("C:\\Users\\Akshay\\model_deployment_books\\updated_books.csv")
+df = pd.read_csv("updated_books.csv")
 
 # Drop unnecessary columns
 df.drop(columns=["original_title"], axis=1, inplace=True)
